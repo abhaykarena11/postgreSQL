@@ -1,0 +1,172 @@
+
+
+CREATE SCHEMA ec;
+
+
+CREATE TABLE ec.customers (
+    customer_id BIGSERIAL PRIMARY KEY,
+    full_name VARCHAR(100),
+    email VARCHAR(120),
+    city VARCHAR(50),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE ecommerce.products (
+    product_id BIGSERIAL PRIMARY KEY,
+    product_name VARCHAR(100),
+    category VARCHAR(50),
+    price NUMERIC(10,2),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE ecommerce.orders (
+    order_id BIGSERIAL PRIMARY KEY, --auto-incrementing 64-bit integer columns
+    customer_id BIGINT REFERENCES ecommerce.customers(customer_id),
+    order_date DATE,
+    status VARCHAR(20),
+    total_amount NUMERIC(12,2)
+);
+
+--SET search_path TO ecommerce;
+
+-- Parent table with common columns
+CREATE TABLE ec.products (
+    product_id BIGSERIAL PRIMARY KEY,
+    product_name VARCHAR(100),
+    price NUMERIC(10,2),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Electronics table inherits all columns from products
+CREATE TABLE ec.electronics (
+    warranty_years INT,
+    brand VARCHAR(50)
+) INHERITS (ec.products);
+
+INSERT INTO ecommerce.electronics (product_name, price, warranty_years, brand)
+VALUES ('Laptop', 75000.00, 2, 'Dell');
+
+select * from ecommerce.electronics
+
+
+-- data types --
+
+-- Enumerated --
+CREATE TYPE order_status AS ENUM (
+    'pending',
+    'processing',
+    'shipped',
+    'delivered',
+    'cancelled'
+);
+
+CREATE TABLE orders (
+    order_id BIGSERIAL PRIMARY KEY,
+    status order_status NOT NULL
+);
+
+
+-- Monetary --
+
+CREATE TABLE payments (
+    payment_id BIGSERIAL PRIMARY KEY,
+    amount MONEY
+);
+
+INSERT INTO payments (amount) VALUES (250.75);
+INSERT INTO payments (amount)
+VALUES (250.75::money);
+select * from payments
+
+SHOW lc_monetary;
+
+SELECT 250.75::money;
+
+
+--Location -- 
+
+CREATE TABLE locations (
+    location_id BIGSERIAL PRIMARY KEY,
+    position POINT
+);
+
+INSERT INTO locations (position)
+VALUES (POINT(40.7128, -74.0060));
+
+SELECT position FROM locations;
+-- (40.7128,-74.006)
+
+
+
+INSERT INTO customers (full_name, email, city)
+VALUES ('Rahul Sharma', 'rahul.sharma@gmail.com', 'Mumbai');
+
+
+INSERT INTO products (product_name, category, price)
+VALUES ('iPhone 15', 'Electronics', 79999.00);
+
+
+INSERT INTO orders (customer_id, order_date, status, total_amount)
+VALUES (1, CURRENT_DATE, 'pending', 79999.00);
+
+
+SELECT * FROM customers;
+
+
+UPDATE customers
+SET city = 'Pune',
+
+WHERE customer_id = 1;
+
+UPDATE orders
+SET status = 'shipped'
+WHERE order_id = 1;
+
+
+DELETE FROM customers
+WHERE customer_id NOT IN (
+    SELECT DISTINCT customer_id FROM orders
+);
+
+
+
+
+
+
+-- Subquery returns customer_ids who have orders
+SELECT last_name as 'surname'
+FROM customers
+WHERE customer_id IN (
+    SELECT customer_id
+    FROM orders
+);
+
+
+-- Products costing more than ANY order total --
+-- ANY compares price with each value returned by subquery --
+SELECT product_name, price
+FROM products
+WHERE price > ANY (
+    SELECT total_amount
+    FROM orders
+);
+
+-- Select customers whose all orders have total_amount > 10000
+SELECT c.customer_id, c.full_name
+FROM customers c
+WHERE 10000 < ALL (
+    SELECT o.total_amount
+    FROM orders o
+    WHERE o.customer_id = c.customer_id
+) limit 10;
+
+
+
+-- Customers who have NOT placed any order --
+SELECT *
+FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM orders o
+    WHERE o.customer_id = c.customer_id
+);
