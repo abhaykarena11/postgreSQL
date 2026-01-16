@@ -1,0 +1,262 @@
+
+CREATE TABLE hc.roles(
+	role_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+	role_name VARCHAR(50) NOT NULL ,
+	created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE hc.users
+ADD COLUMN role_id UUID;
+
+ALTER TABLE hc.users
+ADD CONSTRAINT fk_users_roles
+FOREIGN KEY (role_id)
+REFERENCES hc.roles(role_id);
+
+
+CREATE TABLE hc.service_types (
+	service_type_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+	service_type_name VARCHAR(100),
+	created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE hc.categories (
+	category_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+	category_name VARCHAR(100),
+	caretaed_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	service_type_id UUID,
+
+	CONSTRAINT fk_categories_service_types
+	FOREIGN KEY (service_type_id)
+	REFERENCES hc.service_types(service_type_id)
+);
+
+CREATE TABLE hc.sub_categories(
+	sub_category_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+	sub_category_name VARCHAR(100),
+	created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	category_id UUID,
+	
+	CONSTRAINT fk_sub_categories_categories
+	FOREIGN KEY (category_id)
+	REFERENCES hc.categories(category_id)
+);
+
+--insert data 
+
+INSERT INTO hc.roles (role_name) VALUES
+('trainee'),
+('software_engineer'),
+('senior_software_engineer'),
+('team_lead'),
+('manager'),
+('cto'),
+('ceo');
+
+INSERT INTO hc.service_types (service_type_name) VALUES
+('web_development'),
+('mobile_app_development'),
+('cloud_services'),
+('data_analytics'),
+('ai_ml_services'),
+('devops_services'),
+('software_testing');
+
+INSERT INTO hc.categories (category_name, service_type_id) VALUES
+
+-- web_development
+('frontend', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'web_development')),
+('backend', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'web_development')),
+('fullstack', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'web_development')),
+
+-- mobile_app_development
+('android', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'mobile_app_development')),
+('ios', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'mobile_app_development')),
+('cross_platform', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'mobile_app_development')),
+
+-- cloud_services
+('aws', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'cloud_services')),
+('azure', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'cloud_services')),
+('google_cloud', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'cloud_services')),
+
+-- data_analytics
+('business_intelligence', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'data_analytics')),
+('data_engineering', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'data_analytics')),
+('data_visualization', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'data_analytics')),
+
+-- ai_ml_services
+('machine_learning', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'ai_ml_services')),
+('deep_learning', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'ai_ml_services')),
+('natural_language_processing', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'ai_ml_services')),
+
+-- devops_services
+('ci_cd', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'devops_services')),
+('containerization', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'devops_services')),
+('infrastructure_as_code', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'devops_services')),
+
+-- software_testing
+('manual_testing', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'software_testing')),
+('automation_testing', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'software_testing')),
+('performance_testing', (SELECT service_type_id FROM hc.service_types WHERE service_type_name = 'software_testing'));
+
+INSERT INTO hc.sub_categories (sub_category_name, category_id) VALUES
+
+-- web_development → frontend
+('html_css', (SELECT category_id FROM hc.categories WHERE category_name = 'frontend')),
+('javascript', (SELECT category_id FROM hc.categories WHERE category_name = 'frontend')),
+('reactjs', (SELECT category_id FROM hc.categories WHERE category_name = 'frontend')),
+
+-- web_development → backend
+('nodejs', (SELECT category_id FROM hc.categories WHERE category_name = 'backend')),
+('dotnet', (SELECT category_id FROM hc.categories WHERE category_name = 'backend')),
+('java_spring', (SELECT category_id FROM hc.categories WHERE category_name = 'backend')),
+
+-- web_development → fullstack
+('mern_stack', (SELECT category_id FROM hc.categories WHERE category_name = 'fullstack')),
+('mean_stack', (SELECT category_id FROM hc.categories WHERE category_name = 'fullstack')),
+
+-- mobile_app_development → android
+('kotlin', (SELECT category_id FROM hc.categories WHERE category_name = 'android')),
+('java_android', (SELECT category_id FROM hc.categories WHERE category_name = 'android')),
+
+-- mobile_app_development → ios
+('swift', (SELECT category_id FROM hc.categories WHERE category_name = 'ios')),
+('objective_c', (SELECT category_id FROM hc.categories WHERE category_name = 'ios')),
+
+-- mobile_app_development → cross_platform
+('flutter', (SELECT category_id FROM hc.categories WHERE category_name = 'cross_platform')),
+('react_native', (SELECT category_id FROM hc.categories WHERE category_name = 'cross_platform')),
+
+-- cloud_services → aws
+('ec2', (SELECT category_id FROM hc.categories WHERE category_name = 'aws')),
+('s3', (SELECT category_id FROM hc.categories WHERE category_name = 'aws')),
+('lambda', (SELECT category_id FROM hc.categories WHERE category_name = 'aws')),
+
+-- cloud_services → azure
+('virtual_machines', (SELECT category_id FROM hc.categories WHERE category_name = 'azure')),
+('blob_storage', (SELECT category_id FROM hc.categories WHERE category_name = 'azure')),
+
+-- cloud_services → google_cloud
+('compute_engine', (SELECT category_id FROM hc.categories WHERE category_name = 'google_cloud')),
+('cloud_storage', (SELECT category_id FROM hc.categories WHERE category_name = 'google_cloud')),
+
+-- data_analytics → business_intelligence
+('power_bi', (SELECT category_id FROM hc.categories WHERE category_name = 'business_intelligence')),
+('tableau', (SELECT category_id FROM hc.categories WHERE category_name = 'business_intelligence')),
+
+-- data_analytics → data_engineering
+('etl_pipelines', (SELECT category_id FROM hc.categories WHERE category_name = 'data_engineering')),
+('apache_spark', (SELECT category_id FROM hc.categories WHERE category_name = 'data_engineering')),
+
+-- data_analytics → data_visualization
+('matplotlib', (SELECT category_id FROM hc.categories WHERE category_name = 'data_visualization')),
+('seaborn', (SELECT category_id FROM hc.categories WHERE category_name = 'data_visualization')),
+
+-- ai_ml_services → machine_learning
+('regression', (SELECT category_id FROM hc.categories WHERE category_name = 'machine_learning')),
+('classification', (SELECT category_id FROM hc.categories WHERE category_name = 'machine_learning')),
+
+-- ai_ml_services → deep_learning
+('cnn', (SELECT category_id FROM hc.categories WHERE category_name = 'deep_learning')),
+('rnn', (SELECT category_id FROM hc.categories WHERE category_name = 'deep_learning')),
+
+-- ai_ml_services → natural_language_processing
+('text_classification', (SELECT category_id FROM hc.categories WHERE category_name = 'natural_language_processing')),
+('sentiment_analysis', (SELECT category_id FROM hc.categories WHERE category_name = 'natural_language_processing')),
+
+-- devops_services → ci_cd
+('jenkins', (SELECT category_id FROM hc.categories WHERE category_name = 'ci_cd')),
+('github_actions', (SELECT category_id FROM hc.categories WHERE category_name = 'ci_cd')),
+
+-- devops_services → containerization
+('docker', (SELECT category_id FROM hc.categories WHERE category_name = 'containerization')),
+('kubernetes', (SELECT category_id FROM hc.categories WHERE category_name = 'containerization')),
+
+-- devops_services → infrastructure_as_code
+('terraform', (SELECT category_id FROM hc.categories WHERE category_name = 'infrastructure_as_code')),
+('cloudformation', (SELECT category_id FROM hc.categories WHERE category_name = 'infrastructure_as_code')),
+
+-- software_testing → manual_testing
+('test_case_design', (SELECT category_id FROM hc.categories WHERE category_name = 'manual_testing')),
+('exploratory_testing', (SELECT category_id FROM hc.categories WHERE category_name = 'manual_testing')),
+
+-- software_testing → automation_testing
+('selenium', (SELECT category_id FROM hc.categories WHERE category_name = 'automation_testing')),
+('cypress', (SELECT category_id FROM hc.categories WHERE category_name = 'automation_testing')),
+
+-- software_testing → performance_testing
+('jmeter', (SELECT category_id FROM hc.categories WHERE category_name = 'performance_testing')),
+('load_runner', (SELECT category_id FROM hc.categories WHERE category_name = 'performance_testing'));
+
+--update users table Assign role
+UPDATE hc.users
+SET role_id = (
+    SELECT role_id FROM hc.roles WHERE role_name = 'ceo'
+)
+WHERE email = 'abhaykarena@etatvasoft.com';
+UPDATE hc.users
+SET role_id = (
+    SELECT role_id FROM hc.roles WHERE role_name = 'cto'
+)
+WHERE email = 'aaryankarena@example.com';
+UPDATE hc.users
+SET role_id = (
+    SELECT role_id FROM hc.roles WHERE role_name = 'manager'
+)
+WHERE email IN (
+    'meetbhesaniya@bing.com',
+    'dhruvitgarthiya@example.com'
+);
+UPDATE hc.users
+SET role_id = (
+    SELECT role_id FROM hc.roles WHERE role_name = 'team_lead'
+)
+WHERE email IN (
+    'harshithadiya@gmail.com',
+    'tanveerchauhan@yahoo.com'
+);
+UPDATE hc.users
+SET role_id = (
+    SELECT role_id FROM hc.roles WHERE role_name = 'senior_software_engineer'
+)
+WHERE email IN (
+    'virendrabarber@duckduck.com',
+    'ankitpatel@yahoo.com'
+);
+UPDATE hc.users
+SET role_id = (
+    SELECT role_id FROM hc.roles WHERE role_name = 'software_engineer'
+)
+WHERE email IN (
+    'prakashpatoliya@example.com',
+);
+UPDATE hc.users
+SET role_id = (
+    SELECT role_id FROM hc.roles WHERE role_name = 'trainee'
+)
+WHERE email IN (
+    
+    'hetpatel@gmail.com'
+);
+
+SELECT * FROM hc.users;
+SELECT * FROM hc.roles;
+SELECT * FROM hc.service_types;
+SELECT * FROM hc.categories;
+SELECT * FROM hc.sub_categories;
+
+
+
+
+-- 1. Aggregate Functions 
+
+SELECT COUNT(user_id) AS total_users FROM hc.users;
+SELECT COUNT(user_id) AS total_active_users FROM hc.users WHERE is_active=TRUE;
+SELECT COUNT(user_id) AS number_of_users , role_name FROM hc.users INNER JOIN hc.roles ON hc.users.role_id = hc.roles.role_id GROUP BY role_name;
+SELECT MIN(birth_date) AS minimum_birth_date , MAX(birth_date) AS maximum_birth_date FROM hc.users;
+SELECT
+    ROUND(AVG(EXTRACT(EPOCH FROM AGE(CURRENT_DATE, birth_date)) / 86400 / 365.25),2) AS average_age
+FROM hc.users;
+
+SELECT COUNT(category_id) AS COUNT , service_type_name FROM hc.categories as c INNER JOIN hc.service_types as s
+ON c.service_type_id = s.service_type_id GROUP BY s.service_type_name;
