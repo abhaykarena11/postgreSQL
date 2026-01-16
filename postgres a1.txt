@@ -1,0 +1,90 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE hc.users (
+    user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password TEXT NOT NULL,  -- store hashed password
+
+    created_by UUID,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    modified_by UUID,
+    modified_date TIMESTAMP,
+
+    is_active BOOLEAN DEFAULT TRUE,
+    is_deleted BOOLEAN DEFAULT FALSE,
+
+    birth_date DATE,
+    address TEXT,
+    mobile_number VARCHAR(20),
+
+    CONSTRAINT fk_created_by
+        FOREIGN KEY (created_by) REFERENCES hc.users(user_id),
+
+    CONSTRAINT fk_modified_by
+        FOREIGN KEY (modified_by) REFERENCES hc.users(user_id)
+);
+
+
+INSERT INTO hc.users (
+    first_name,
+    last_name,
+    email,
+    password,
+    birth_date,
+    address,
+    mobile_number
+)
+VALUES (
+    'Abhay',
+    'Karena',
+    'abhaykarena@etatvasoft.com',
+    crypt('Abhay@123', gen_salt('bf')),
+    '2005-01-01',
+    'Ahmedabad',
+    '1234567890'
+);
+
+
+INSERT INTO hc.users (
+	first_name,
+	last_name,
+	email,
+	password,
+	birth_date,
+	address,
+	mobile_number,
+	created_by
+) VALUES 
+('meet','bhesaniya','meetbhesaniya@bing.com',crypt('Meet@123',gen_salt('bf')),'2005-01-02','Ahmedabad','0987654321',(SELECT user_id FROM hc.users WHERE email='abhaykarena@etatvasoft.com')),
+('dhruvit','garthiya','dhruvitgarthiya@example.com',crypt('Meet@123',gen_salt('bf')),'2005-01-03','Ahmedabad','1234567890',(SELECT user_id FROM hc.users WHERE email='abhaykarena@etatvasoft.com')),
+('harshit','hadiya','harshithadiya@gmail.com',crypt('Meet@123',gen_salt('bf')),'2005-01-04','Ahmedabad','0987654321',(SELECT user_id FROM hc.users WHERE email='abhaykarena@etatvasoft.com')),
+('tanveer','chauhan','tanveerchauhan@yahoo.com',crypt('Meet@123',gen_salt('bf')),'2005-01-05','Ahmedabad','1234567890',(SELECT user_id FROM hc.users WHERE email='abhaykarena@etatvasoft.com')),
+('virendra','barber','virendrabarber@duckduck.com',crypt('Meet@123',gen_salt('bf')),'2005-01-06','Ahmedabad','0987654321',(SELECT user_id FROM hc.users WHERE email='abhaykarena@etatvasoft.com')),
+('ankit','patel','ankitpatel@yahoo.com',crypt('Meet@123',gen_salt('bf')),'2005-01-07','Ahmedabad','1234567890',(SELECT user_id FROM hc.users WHERE email='abhaykarena@etatvasoft.com')),
+('prakash','patoliya','prakashpatoliya@example.com',crypt('Meet@123',gen_salt('bf')),'2005-01-08','Ahmedabad','0987654321',(SELECT user_id FROM hc.users WHERE email='abhaykarena@etatvasoft.com')),
+('het','patel','hetpatel@gmail.com',crypt('Meet@123',gen_salt('bf')),'2005-01-09','Ahmedabad','1234567890',(SELECT user_id FROM hc.users WHERE email='abhaykarena@etatvasoft.com')),
+('aaryan','karena','aaryankarena@example.com',crypt('Meet@123',gen_salt('bf')),'2005-01-10','Ahmedabad','0987654321',(SELECT user_id FROM hc.users WHERE email='abhaykarena@etatvasoft.com'));
+
+
+SELECT * FROM hc.users;
+
+SELECT ( first_name || ' ' || last_name ) AS fullname , email FROM hc.users; 
+
+SELECT * FROM hc.users WHERE is_active= FALSE;
+
+SELECT * FROM hc.users WHERE first_name LIKE 'A%' AND last_name LIKE '%i';
+
+SELECT * FROM hc.users WHERE email LIKE '%@example%';
+
+SELECT * FROM hc.users WHERE first_name ILIKE 'A%'
+
+SELECT * FROM hc.users ORDER BY created_date DESC;
+
+SELECT * FROM hc.users ORDER BY created_date DESC LIMIT 5;
+
+SELECT * FROM hc.users ORDER BY created_date DESC LIMIT 5 OFFSET 5;
