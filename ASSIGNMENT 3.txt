@@ -1,0 +1,143 @@
+3. Stored Procedures
+
+CREATE PROCEDURE insert_user(
+    cur_first_name VARCHAR(100),
+    cur_last_name VARCHAR(100),
+    cur_email VARCHAR(255),
+    cur_password TEXT,
+	cur_is_active BOOLEAN,
+    cur_birth_date date,
+    cur_address TEXT,
+    cur_mobile_number VARCHAR(20),
+	cur_created_by_email VARCHAR(255)
+)
+language plpgsql
+AS $$
+begin
+
+     IF EXISTS (
+         SELECT 1 FROM 
+		 hc.users WHERE email = cur_email
+	 ) 
+	 THEN 
+	     RAISE EXCEPTION 'email already exists',cur_email;
+	 END IF;
+	 
+     INSERT INTO hc.users (
+	   first_name,
+	   last_name,
+	   email,
+	   password,
+	   is_active,
+	   birth_date,
+	   address,
+	   mobile_number,
+	   created_by,
+	   created_date
+     ) VALUES
+	 (cur_first_name,cur_last_name,
+	 cur_email,
+	 crypt(cur_password,gen_salt('bf')),
+	 cur_is_active,cur_birth_date,cur_address,
+	 cur_mobile_number,
+	 (SELECT user_id FROM hc.users WHERE email = cur_created_by_email)),
+	 CURRENT_TIMESTAMP;
+
+end;$$;
+
+
+ CREATE PROCEDURE soft_delete_user( 
+     cur_email VARCHAR(255)   
+ )
+ language plpgsql
+ AS $$
+ begin
+      IF NOT EXISTS (
+        SELECT 1 FROM hc.users 
+        WHERE email = cur_email AND is_deleted = FALSE
+      ) THEN
+        RAISE EXCEPTION 'User with email % does not exist or is already deleted', cur_email;
+      END IF;
+	
+      UPDATE hc.users
+	  SET is_deleted = TRUE, 
+	  is_active=FALSE,
+	  modified_date = CURRENT_TIMESTAMP
+	  WHERE email = cur_email;
+ end;$$;
+
+
+
+CREATE PROCEDURE update_role(
+ cur_email VARCHAR(255),
+ cur_role_name VARCHAR(50)
+)
+language plpgsql
+AS $$
+begin
+     IF NOT EXISTS ( 
+	 SELECT 1 FROM hc.users WHERE email = cur_email)
+	 THEN RAISE EXCEPTION 'user % is not exists',cur_email;
+	 END IF;
+
+	 IF NOT EXISTS(
+     SELECT 1 FROM hc.roles WHERE role_name = cur_role_name)
+	 THEN RAISE EXCEPTION 'role % is not exists',cur_role_name;
+	 END IF;
+	 
+     UPDATE hc.users
+	 SET role_id = ( SELECT role_id FROM hc.roles WHERE role_name = cur_role_name ),
+	     modified_date = CURRENT_TIMESTAMP
+     WHERE email = cur_email; 
+end;$$;
+
+
+
+DROP PROCEDURE update_role;
+CREATE OR REPLACE PROCEDURE update_role(
+ cur_email VARCHAR(255),
+ cur_role_name VARCHAR(50)
+)
+language plpgsql
+AS $$
+declare
+     cur_user_id UUID;
+	 cur_old_role_id UUID;
+	 cur_new_role_id UUID;
+begin
+     SELECT user_id , role_id
+	 INTO cur_user_id,cur_old_role_id
+	 FROM hc.users
+	 WHERE email = cur_email;
+
+
+     IF cur_user_id IS NULL
+	 THEN RAISE EXCEPTION 'user % is not exists',cur_email;
+	 END IF;
+	 
+	 SELECT role_id
+	 INTO cur_new_role_id
+	 FROM hc.roles
+	 WHERE role_name = cur_role_name;
+
+	 IF cur_new_role_id IS NULL
+	 THEN RAISE EXCEPTION 'new role % is not exists',cur_role_name;
+	 END IF;
+
+	 UPDATE hc.users
+	 SET role_id = cur_old_role_id
+	 WHERE user_id = cur_user_id;
+
+	 INSERT INTO hc.users_role_audit (user_id , old_role_id , new_role_id)
+	 VALUES (cur_user_id , cur_old_role_id , cur_new_role_id);
+end;$$;
+
+
+
+CREATE TABLE hc.users_role_audit(
+ audit_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+ user_id UUID NOT NULL,
+ old_role_id UUID,
+ new_role_id UUID,
+ changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
