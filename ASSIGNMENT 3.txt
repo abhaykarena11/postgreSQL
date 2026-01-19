@@ -26,6 +26,60 @@ CREATE MATERIALIZED VIEW roles_info AS
 REFRESH MATERIALIZED VIEW roles_info;
 
 
+-- 2. Functions 
+
+CREATE OR REPLACE FUNCTION get_total_users_of_role(cur_role_id UUID)
+RETURNS INT
+LANGUAGE sql AS
+$$
+SELECT COUNT(user_id) AS users_count
+FROM hc.users
+WHERE role_id = cur_role_id;
+$$
+
+
+CREATE OR REPLACE FUNCTION get_full_name_user_id(cur_user_id UUID)
+RETURNS VARCHAR(100)
+LANGUAGE plpgsql AS
+$$
+DECLARE 
+full_name VARCHAR(100);
+BEGIN
+SELECT (first_name || ' ' || last_name) INTO full_name
+FROM hc.users
+WHERE user_id = cur_user_id;
+RETURN full_name;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION get_age_from_birth_date(birth_date DATE)
+RETURNS NUMERIC(5,2)
+LANGUAGE plpgsql AS
+$$
+DECLARE 
+age NUMERIC(5,2);
+BEGIN
+SELECT ROUND(EXTRACT(EPOCH FROM AGE(CURRENT_TIMESTAMP , birth_date)) / 86400 / 365.25,2) INTO age;
+RETURN age;
+
+END;$$;
+
+CREATE OR REPLACE FUNCTION get_users_created_today()
+RETURNS TABLE (user_id UUID ,first_name VARCHAR(100) , email VARCHAR(255))
+LANGUAGE plpgsql AS
+$$
+BEGIN
+
+RETURN QUERY
+(SELECT u.user_id , u.first_name , u.email
+FROM hc.users u
+WHERE created_date::DATE = CURRENT_DATE
+);
+
+END;$$;
+
+
 --3. Stored Procedures
 
 CREATE PROCEDURE insert_user(
@@ -169,3 +223,4 @@ CREATE TABLE hc.users_role_audit(
  new_role_id UUID,
  changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
