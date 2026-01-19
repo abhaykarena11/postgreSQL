@@ -1,4 +1,32 @@
-3. Stored Procedures
+-- 1. Views & Materialized Views
+CREATE VIEW users_info AS
+	SELECT user_id, 
+	(first_name || ' ' || last_name) AS full_name,
+	email,role_name
+	FROM hc.users AS u
+	INNER JOIN hc.roles AS r
+	ON u.role_id = r.role_id;
+
+
+CREATE OR REPLACE VIEW active_users_created_30days AS
+	SELECT * FROM 
+	hc.users
+    WHERE is_active = TRUE AND 
+	created_date < CURRENT_DATE + INTERVAL '1 day'
+    AND created_date >= CURRENT_DATE - INTERVAL '30 day';
+
+CREATE MATERIALIZED VIEW roles_info AS
+	SELECT role_name , COUNT(user_id) AS users_per_role
+	FROM hc.roles AS r
+	LEFT JOIN hc.users AS u
+	ON r.role_id = u.role_id
+	GROUP BY role_name
+	ORDER BY COUNT(user_id) DESC;
+
+REFRESH MATERIALIZED VIEW roles_info;
+
+
+--3. Stored Procedures
 
 CREATE PROCEDURE insert_user(
     cur_first_name VARCHAR(100),
@@ -20,7 +48,7 @@ begin
 		 hc.users WHERE email = cur_email
 	 ) 
 	 THEN 
-	     RAISE EXCEPTION 'email already exists',cur_email;
+	     RAISE EXCEPTION 'email % already exists',cur_email;
 	 END IF;
 	 
      INSERT INTO hc.users (
@@ -40,8 +68,8 @@ begin
 	 crypt(cur_password,gen_salt('bf')),
 	 cur_is_active,cur_birth_date,cur_address,
 	 cur_mobile_number,
-	 (SELECT user_id FROM hc.users WHERE email = cur_created_by_email)),
-	 CURRENT_TIMESTAMP;
+	 (SELECT user_id FROM hc.users WHERE email = cur_created_by_email),
+	 CURRENT_TIMESTAMP);
 
 end;$$;
 
