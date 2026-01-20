@@ -1,1 +1,6 @@
-# postgreSQL
+assignment 3 : https://onedrive.live.com/:w:/g/personal/C60105501C7F8A8F/IQAEkoAKtpJzQqJUFOJ6kaY6AX7eApAD_6Aymstq2PVh-jw?resid=C60105501C7F8A8F!s0a80920492b64273a25414e27a91a63a&ithint=file%2Cdocx&e=Ezzuo2&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL3cvYy9jNjAxMDU1MDFjN2Y4YThmL0lRQUVrb0FLdHBKelFxSlVGT0o2a2FZNkFYN2VBcEFEXzZBeW1zdHEyUFZoLWp3P2U9RXp6dW8y
+
+Assignment 2 :  https://onedrive.live.com/:w:/g/personal/C60105501C7F8A8F/IQBs7Nq5rMlsR4dC8nSUQ1YrASIfE8-XaBeEke259RUaVLY?resid=C60105501C7F8A8F!sb9daec6cc9ac476c8742f2749443562b&ithint=file%2Cdocx&e=1xPRdY&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL3cvYy9jNjAxMDU1MDFjN2Y4YThmL0lRQnM3TnE1ck1sc1I0ZEM4blNVUTFZckFTSWZFOC1YYUJlRWtlMjU5UlVhVkxZP2U9MXhQUmRZ
+
+Assignment 1 :
+https://onedrive.live.com/:w:/g/personal/C60105501C7F8A8F/IQAEvrs0_wmcTpx89ag0425oAcSUwsgp5OgxXHWYpEEHXzA?resid=C60105501C7F8A8F!s34bbbe0409ff4e9c9c7cf5a834e36e68&ithint=file%2Cdocx&e=KORn8d&migratedtospo=true&redeem=aHR0cHM6Ly8xZHJ2Lm1zL3cvYy9jNjAxMDU1MDFjN2Y4YThmL0lRQUV2cnMwX3dtY1RweDg5YWcwNDI1b0FjU1V3c2dwNU9neFhIV1lwRUVIWHpBP2U9S09Sbjhk
